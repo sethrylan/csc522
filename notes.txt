@@ -1,9 +1,0 @@
-Datasets
-
-
-http://www.kdnuggets.com/datasets/index.html
-http://archive.ics.uci.edu/ml/
-http://www-users.cs.umn.edu/~kumar/dmbook/resources.htm
-
-http://www.cs.ucsb.edu/~kemm/courses/CS595/TestingIDSs/
-http://nces.ed.gov/ecls/dataproducts.asp
