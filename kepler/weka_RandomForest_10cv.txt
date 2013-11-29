@@ -1,0 +1,53 @@
+=== Run information ===
+
+Scheme:weka.classifiers.trees.RandomForest -I 10 -K 0 -S 1
+Relation:     koi_cumulative_active_q1_16.csv .preprocessed-weka.filters.unsupervised.attribute.Remove-R1-2,6-9,22-23-weka.filters.unsupervised.attribute.Remove-R2,6,9-10
+Instances:    2338
+Attributes:   11
+              koi_disposition
+              koi_time0bk
+              koi_incl
+              koi_sma
+              koi_ror
+              koi_dor
+              koi_steff
+              koi_slogg
+              koi_srad
+              koi_smass
+              koi_sage
+Test mode:10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+Random forest of 10 trees, each constructed while considering 4 random features.
+Out of bag error: 0.0406
+
+
+
+Time taken to build model: 0.12 seconds
+
+=== Stratified cross-validation ===
+=== Summary ===
+
+Correctly Classified Instances        2274               97.2626 %
+Incorrectly Classified Instances        64                2.7374 %
+Kappa statistic                          0.7399
+Mean absolute error                      0.0636
+Root mean squared error                  0.1626
+Relative absolute error                 51.2385 %
+Root relative squared error             65.3695 %
+Total Number of Instances             2338     
+
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.997     0.368      0.974     0.997     0.986      0.934    FALSE POSITIVE
+                 0.632     0.003      0.933     0.632     0.754      0.934    CONFIRMED
+Weighted Avg.    0.973     0.344      0.972     0.973     0.97       0.934
+
+=== Confusion Matrix ===
+
+    a    b   <-- classified as
+ 2176    7 |    a = FALSE POSITIVE
+   57   98 |    b = CONFIRMED
+

@@ -5,7 +5,7 @@
 # See field descriptions at http://exoplanetarchive.ipac.caltech.edu/docs/API_kepcandidate_columns.html
 
 # Parameters
-project_dir <- "C:/projects/NCSU/CSC522/kepler"
+project_dir <- "/Users/gaineys/projects/NCSU/CSC522/kepler"
 koi_url <- "http://exoplanetarchive.ipac.caltech.edu/cgi-bin/nstedAPI/nph-nstedAPI?table=cumulative"
 koi_filename <- "koi_cumulative_active_q1_16.csv"
 
@@ -26,6 +26,7 @@ require(ggplot2)
 require(GGally)
 library(rJava)
 require(FSelector)
+library(rpart)
 # If you receive the error:
 # error: unable to load shared object 'C:/Program Files/R/R-3.0.1/library/rJava/libs/i386/rJava.dll':
 # LoadLibrary failure:  The specified module could not be found.
@@ -46,14 +47,22 @@ confirmed_planets <- kois[kois$koi_disposition=="CONFIRMED",]
 candidate_planets <- kois[kois$koi_disposition=="CANDIDATE",]
 disposed <- subset(kois, !kepoi_name %in% candidate_planets$kepoi_name)
 
+# A 14:1 class size ratio
+table(factor(disposed$koi_disposition))
+
+
+# useful attributes; removed koi_longp, koi_smet, koi_pdisposition
+covariates <- c("ra_str", "dec_str", "koi_period", "koi_time0bk", "koi_depth", "koi_duration", "koi_ingress", "koi_impact", "koi_incl", "koi_sma", "koi_eccen", "koi_ror", "koi_dor", "koi_prad", "koi_teq", "koi_steff", "koi_slogg", "koi_srad", "koi_smass", "koi_sage", "koi_sparprov", "koi_vet_date")
+
+subset <- disposed[, names(disposed) %in% c(covariates, "koi_disposition")]
+write.table(subset, file = paste(koi_filename,".preprocessed.csv"), sep= ",")
+
 # drop factor levels
 false_positives$koi_disposition <- factor(false_positives$koi_disposition)
 confirmed_planets$koi_disposition <- factor(confirmed_planets$koi_disposition)
 candidate_planets$koi_disposition <- factor(candidate_planets$koi_disposition)
 disposed$koi_disposition <- factor(disposed$koi_disposition)
 
-# useful covariates; removed koi_longp, koi_smet, koi_pdisposition
-covariates <- c("ra_str", "dec_str", "koi_period", "koi_time0bk", "koi_depth", "koi_duration", "koi_ingress", "koi_impact", "koi_incl", "koi_sma", "koi_eccen", "koi_ror", "koi_dor", "koi_prad", "koi_teq", "koi_steff", "koi_slogg", "koi_srad", "koi_smass", "koi_sage", "koi_sparprov", "koi_vet_date")
 
 pairs(~koi_ror+koi_incl+koi_prad+koi_sage, data=disposed, pch = 21, cex = .6, labels=c("Planet-Star Radius Ratio", "Inclination", "Planetary Radius", "Stellar Age"), main="Scatterplot Matrix", bg = c("white", "green","red")[unclass(disposed$koi_disposition)])
 pairs(~dec_str+ra_str+koi_ingress+koi_sparprov+koi_dor, data=disposed, pch = 21, cex=.6, bg = c("white", "green","red")[unclass(disposed$koi_disposition)])
@@ -64,18 +73,25 @@ plotmatrix(iris[,1:4], colour="gray20") + geom_smooth(method="lm")
 #ggpairs(iris, colour='Species', alpha=0.4)
 #ggpairs(head(disposed[2:6], 4), colour='koi_disposition', alpha=0.4)
 
+
+# Scatterplot of RA and DEC angles for confirmed and FP classes
 ggplot(disposed, aes(x=ra_str, y=dec_str, color=koi_disposition)) + geom_point(shape=1) + scale_y_discrete(breaks=seq(0, 10, 0.25)) + theme(axis.ticks=element_blank(), axis.text.y = element_blank())
+
+# Boxplot of inclination for confirmed and FP classes
 p <- ggplot(disposed, aes(factor(koi_disposition), koi_incl))
 p <- p + geom_boxplot(outlier.colour="#2F4F4F", fill="#CDCDCD", colour="#2F4F4F") + coord_flip()
 p <- p + theme(axis.title.y = element_blank()) + ylab("Inclination (degrees)")
 p
 
+# Boxplot of planetary radius for confirmed and FP classes
 p <- ggplot(disposed, aes(factor(koi_disposition), koi_prad))
 p + geom_boxplot(outlier.colour="#2F4F4F", fill="#CDCDCD", colour="#2F4F4F") + coord_flip()
 
+# Boxplot of Planet-Start Radius Ration (RoR) for confirmed and FP classes
 p <- ggplot(disposed, aes(factor(koi_disposition), koi_ror))
 p + geom_boxplot(outlier.colour="#2F4F4F", fill="#CDCDCD", colour="#2F4F4F") + coord_flip()
 
+# Boxplot of stellar age for confirmed and FP classes
 p <- ggplot(disposed, aes(factor(koi_disposition), koi_sage))
 p + geom_boxplot(outlier.colour="#2F4F4F", fill="#CDCDCD", colour="#2F4F4F") + coord_flip()
 
@@ -86,13 +102,55 @@ p <- ggplot(disposed, aes(factor(koi_disposition), koi_dor))
 p + geom_boxplot(outlier.colour="#2F4F4F", fill="#CDCDCD", colour="#2F4F4F") + coord_flip()
 
 
+# Population Differences between False Positives/Confirmed Planets by Planet-Star Radius Ratio (RoR) and Inclination Angle (degrees)
+ggplot(disposed, aes(x=koi_incl, y=koi_ror, color=koi_disposition)) + geom_point(shape=1, alpha=.5)
 
-weights <- information.gain(koi_disposition~., disposed[, names(disposed) %in% c(covariates, "koi_disposition")])
+# TODO: http://cran.r-project.org/doc/contrib/Zhao_R_and_data_mining.pdf
+
+
+#
+
+
+useful_covariates <- c("koi_steff", "koi_smass", "koi_sage", "koi_time0bk", "koi_slogg", "koi_incl", "koi_srad", "koi_dor", "koi_sma", "koi_ror")
+evaluator <- function(subset) {
+  #k-fold cross validation
+  k <- 5
+  splits <- runif(nrow(disposed))
+  results = sapply(1:k, function(i) {
+    test.idx <- (splits >= (i - 1) / k) & (splits < i / k)
+    train.idx <- !test.idx
+    test <- disposed[test.idx, , drop=FALSE]
+    train <- disposed[train.idx, , drop=FALSE]
+    tree <- rpart(as.simple.formula(subset, "koi_disposition"), train)
+    error.rate = sum(test$koi_disposition != predict(tree, test, type="c")) / nrow(test)
+    return(1 - error.rate)
+  })
+  print(subset)
+  print(mean(results))
+  return(mean(results))
+}
+subset <- exhaustive.search(useful_covariates, evaluator)
+f <- as.simple.formula(subset, "koi_disposition")
+print(f)
+
+
+
+
+
+
+# Calculate information gain for our attributes:
+# Where RatioGAIN = GainINFO/H(Attribute) = (H(Class) + H(Attribute) - H(Class|Atribute))/H(Attribute)
+# See FSelector docs: http://cran.r-project.org/web/packages/FSelector/FSelector.pdf
+weights <- gain.ratio(koi_disposition~., disposed[, names(disposed) %in% c(covariates, "koi_disposition")])
+weights <- gain.ratio(koi_disposition~., disposed)
 weights[ order(-weights[,1]), ,drop=FALSE ]
 # higher attr_importance is better
 attribute_subset <- cutoff.k(weights, 5)
 f <- as.simple.formula(attribute_subset, "koi_disposition")
 print(f)
+
+
+traceback()
 
 
 
