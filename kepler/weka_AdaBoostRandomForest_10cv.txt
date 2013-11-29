@@ -1,0 +1,125 @@
+=== Run information ===
+
+Scheme:weka.classifiers.meta.AdaBoostM1 -Q -P 50 -S 1 -I 100 -W weka.classifiers.trees.RandomForest -- -I 10 -K 0 -S 1
+Relation:     koi_cumulative_active_q1_16.csv .preprocessed-weka.filters.unsupervised.attribute.Remove-R1-2,6-9,22-23-weka.filters.unsupervised.attribute.Remove-R2,6,9-10
+Instances:    2338
+Attributes:   11
+              koi_disposition
+              koi_time0bk
+              koi_incl
+              koi_sma
+              koi_ror
+              koi_dor
+              koi_steff
+              koi_slogg
+              koi_srad
+              koi_smass
+              koi_sage
+Test mode:10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+AdaBoostM1: Base classifiers and their weights: 
+
+Random forest of 10 trees, each constructed while considering 4 random features.
+Out of bag error: 0.0175
+
+
+
+Weight: 4.38
+
+Random forest of 10 trees, each constructed while considering 4 random features.
+Out of bag error: 0
+
+
+
+Weight: 0.04
+
+Random forest of 10 trees, each constructed while considering 4 random features.
+Out of bag error: 0.0158
+
+
+
+Weight: 3.43
+
+Random forest of 10 trees, each constructed while considering 4 random features.
+Out of bag error: 0.12
+
+
+
+Weight: 0.85
+
+Random forest of 10 trees, each constructed while considering 4 random features.
+Out of bag error: 0.0857
+
+
+
+Weight: 0.23
+
+Random forest of 10 trees, each constructed while considering 4 random features.
+Out of bag error: 0.0857
+
+
+
+Weight: 0.02
+
+Random forest of 10 trees, each constructed while considering 4 random features.
+Out of bag error: 0.1086
+
+
+
+Weight: 0.02
+
+Random forest of 10 trees, each constructed while considering 4 random features.
+Out of bag error: 0.1314
+
+
+
+Weight: 0.01
+
+Random forest of 10 trees, each constructed while considering 4 random features.
+Out of bag error: 0.1143
+
+
+
+Weight: 0.03
+
+Random forest of 10 trees, each constructed while considering 4 random features.
+Out of bag error: 0.08
+
+
+
+Weight: 0.02
+
+Number of performed Iterations: 10
+
+
+Time taken to build model: 0.14 seconds
+
+=== Stratified cross-validation ===
+=== Summary ===
+
+Correctly Classified Instances        2263               96.7921 %
+Incorrectly Classified Instances        75                3.2079 %
+Kappa statistic                          0.727 
+Mean absolute error                      0.0388
+Root mean squared error                  0.1687
+Relative absolute error                 31.2235 %
+Root relative squared error             67.7965 %
+Total Number of Instances             2338     
+
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.987     0.297      0.979     0.987     0.983      0.875    FALSE POSITIVE
+                 0.703     0.013      0.79      0.703     0.744      0.875    CONFIRMED
+Weighted Avg.    0.968     0.278      0.967     0.968     0.967      0.875	
+
+=== Confusion Matrix ===
+
+    a    b   <-- classified as
+ 2154   29 |    a = FALSE POSITIVE
+   46  109 |    b = CONFIRMED
+
+
+
