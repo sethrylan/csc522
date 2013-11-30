@@ -134,6 +134,41 @@ f <- as.simple.formula(subset, "koi_disposition")
 print(f)
 
 
+# SVM Example
+require(e1071)
+m <- svm(koi_disposition~koi_incl+koi_sma+koi_ror+koi_dor+koi_srad, data = disposed)
+plot(m, disposed)
+m
+m$SV
+m$index
+m$coefs
+
+
+# AdaBoost
+pruned <- read.csv("koi_cumulative_active_q1_16.csv.pruned.csv", sep=",", na.strings = "NA")
+pruned$koi_disposition <- gsub("\\'FALSE POSITIVE\\'", "F", pruned$koi_disposition)
+pruned$koi_disposition <- gsub("CONFIRMED", "C", pruned$koi_disposition)
+require(ada)
+set.seed(42)
+##set up testing and training data (60% for training)
+n<-dim(pruned)[1]
+trind<-sample(1:n,floor(.6*n),FALSE)
+teind<-setdiff(1:n,trind)
+##fit 8-split trees
+gdis<-ada(koi_disposition~koi_incl+koi_sma+koi_ror+koi_dor+koi_srad,data=pruned[trind,],iter=20,nu=1,type="discrete")
+##add testing data set
+gdis=addtest(gdis,pruned[teind,-1], pruned[teind,1], na.action="na.exclude")
+##plot gdis
+plot(gdis,TRUE,TRUE)
+##variable selection plot
+varplot(gdis)
+##pairwise plot
+pairs(gdis,pruned[trind,-1],maxvar=5)
+
+
+
+# Missing values for inclination:
+sapply(pruned[], function(x) sum(is.na(x)))
 
 
 
