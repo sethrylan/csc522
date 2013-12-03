@@ -171,9 +171,11 @@ gdis<-ada(koi_disposition~koi_incl+koi_sma+koi_ror+koi_dor+koi_srad,data=pruned[
 ##add testing data set
 gdis=addtest(gdis,pruned[teind,-1], pruned[teind,1], na.action="na.exclude")
 ##plot gdis
-plot(gdis,TRUE,TRUE)
+plot(gdis,TRUE,TRUE, col=c("black", "dark green", "blue", "red"))
+?plot
 ##variable selection plot
 varplot(gdis)
+?varplot
 ##pairwise plot
 pairs(gdis,pruned[trind,-1],maxvar=5)
 
@@ -234,7 +236,7 @@ library(mice)
 library(mda)
 pruned.imp <- mice(pruned)
 pruned.complete <- complete(pruned.imp)
-steps = seq(1, 8)
+steps = seq(1, )
 nas = rep(NA, length(steps))
 confusions <- data.frame(k=nas, error=nas, stringsAsFactors=FALSE)
 for(k in steps) {
@@ -250,6 +252,48 @@ require(VIM)
 require(mice)
 
 barMiss(exoplanets, delimiter="_pl_discmethod", pos=9)
+mapMiss(exoplanets, coords=exoplanets[, c("XCOO", "YCOO")])
+?barMiss
+
+x <- tao[, c("Air.Temp", "Humidity")]
+histMiss(x)
+histMiss(x, only.miss = FALSE)
+
+x <- exoplanets[, c("pl_discmethod", "pl_dens")]
+histMiss(x)
+
+x <- disposed[, c("koi_disposition", "koi_steff")]
+histMiss(x)
+
+x <- disposed[, c("koi_disposition", "koi_steff")]
+histMiss(x)
+
+
+aggr(disposed[, names(disposed) %in% c("koi_ingress","koi_steff", "koi_slogg","koi_smass","koi_sage")])
+aggr(exoplanets[, !(names(exoplanets) %in% c("pl_hostname","pl_discmethod","pl_ttvflag","ra","dec","pl_publ_date"))])
+
+
+aggr(disposed[, names(disposed) %in% c(covariates, "koi_disposition")])
+
+## for missing values
+a <- aggr(sleep)
+a
+summary(a)
+
+data(sleep, package = "VIM")
+## for missing values
+x <- sleep[, -(8:10)]
+x[,c(1,2,4,6,7)] <- log10(x[,c(1,2,4,6,7)])
+matrixplot(x, sortby = "BrainWgt")
+
+data(tao, package = "VIM")
+## for missing values
+scattMiss(tao[,c("Air.Temp", "Humidity")])
+
+data(sleep, package = "VIM")
+## for missing values
+mosaicMiss(exoplanets, plotvars = 8:10, miss.labels = FALSE)
+
 
 
 # Exoplanets circle packing
@@ -394,7 +438,6 @@ exoplanets.sizes <- cbind(exoplanets.sizes, ones)
 exoplanet.sizes <- exoplanets.sizes[rowSums(is.na(exoplanets.sizes))!=1, ]
 circle.function(exoplanet.sizes, size=c(50,50))
 just.earth <- matrix(c(0.09113015119, 0.09113015119, 1, 1), ncol=2)
-just.earth
 circle.function(just.earth, size=c(50,50))
 
 
